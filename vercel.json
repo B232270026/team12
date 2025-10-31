@@ -1,7 +1,5 @@
 {
-  "version": 2,
-  "cleanUrls": true,
-  "redirects": [
-    { "source": "/", "destination": "/index.html", "permanent": false }
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" }
   ]
 }
