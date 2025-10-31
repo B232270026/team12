@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Амжилттай аян — Дэлгэрэнгүй</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .card { background:white; border-radius: 1rem; border: 1px solid #e2e8f0; overflow: hidden; }
+    .badge { display:inline-flex; align-items:center; gap:6px; font-size:12px; background:#ecfeff; color:#0369a1; border:1px solid #bae6fd; padding:4px 10px; border-radius:999px; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-white to-slate-50 text-gray-900">
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-40 backdrop-blur bg-white/70 border-b">
+    <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-xl bg-rose-600 text-white flex items-center justify-center">
+          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <a href="app.html" class="font-semibold">Хандивын Аяны Вэб</a>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="campaigns.html" class="hover:text-gray-900">Хандивын аян</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <a href="campaigns.html" class="btn btn-outline border rounded-xl px-3 py-1.5">Буцах</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="mx-auto max-w-6xl px-4 py-8">
+    <div id="content"></div>
+  </main>
+
+  <script>
+    // Utils
+    function formatMNT(n){ return new Intl.NumberFormat('mn-MN').format(n) + ' ₮'; }
+    function pct(raised, goal){ return Math.min(100, Math.round((raised/Math.max(1,goal))*100)); }
+    function fmtDate(str){ try { const d = new Date(str); return d.toLocaleDateString('mn-MN'); } catch { return ''; } }
+
+    // Data
+  function getAll(){ try { return JSON.parse(localStorage.getItem('campaigns')||'[]'); } catch { return []; } }
+  function getById(id){ return getAll().find(c => String(c.id) === String(id)); }
+
+    // Render
+    const root = document.getElementById('content');
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    const c = id ? getById(id) : null;
+
+    if(!c){
+      root.innerHTML = `
+        <div class="card p-6">
+          <h1 class="text-xl font-semibold">Аян олдсонгүй</h1>
+          <p class="mt-2 text-gray-600">Та буцах товчоор жагсаалт руу шилжинэ үү.</p>
+          <a href="campaigns.html" class="mt-4 inline-block text-rose-600">Жагсаалт руу буцах →</a>
+        </div>`;
+    } else {
+      const p = 100; // successful page
+      let imgs = (Array.isArray(c.images) ? c.images.slice() : [c.img || c.image]).filter(Boolean);
+      if (imgs.length < 2) {
+        const fallbacks = [
+          'https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?w=800',
+          'public/image1.jpeg'
+        ];
+        imgs = Array.from(new Set(imgs.concat(fallbacks).filter(Boolean)));
+      }
+      const donors = c.donorsCount ?? 147;
+      const beneficiaries = c.beneficiaries ?? 0;
+      const outcome = c.outcome || '';
+      const completedAt = c.completedAt ? fmtDate(c.completedAt) : '';
+
+      const gallery = imgs.length ? `
+          <div class="relative h-56 sm:h-72">
+            <div id="sGalViewport" class="h-full overflow-hidden">
+              <div id="sGalTrack" class="h-full flex transition-transform duration-300 ease-out">${imgs.map((src,i)=>`<div class='w-full h-full flex-shrink-0'><img src='${src}' alt='${c.title} - ${i+1}' class='w-full h-full object-cover' loading='lazy'/></div>`).join('')}</div>
+            </div>
+            <button id="sGalPrev" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full p-2 hover:bg-black/60" aria-label="Өмнөх" title="Өмнөх">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button id="sGalNext" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white rounded-full p-2 hover:bg-black/60" aria-label="Дараах" title="Дараах">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <div id="sGalDots" class="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2">${imgs.map((_,i)=>`<button data-idx='${i}' class='h-2 w-2 rounded-full ${i===0?'bg-white':'bg-white/50'}'></button>`).join('')}</div>
+          </div>` : `<div class='h-56 sm:h-72 bg-gray-100 overflow-hidden'></div>`;
+
+      root.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 card">
+            ${gallery}
+            <div class="p-6">
+              <div class="flex items-center gap-3">
+                <span class="badge">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Амжилттай дууссан
+                </span>
+                ${completedAt?`<span class="text-xs text-gray-500">Дууссан: ${completedAt}</span>`:''}
+              </div>
+              <h1 class="mt-3 text-2xl md:text-3xl font-bold">${c.title}</h1>
+              <p class="mt-3 text-gray-700">${c.desc||''}</p>
+
+              <div class="mt-5">
+                <div class="w-full bg-gray-200 rounded-full h-2.5" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}">
+                  <div class="bg-green-500 h-2.5 rounded-full" style="width:${p}%"></div>
+                </div>
+                <div class="mt-2 text-sm text-gray-600 flex justify-between">
+                  <span>Цугларсан: <span class="font-medium">${formatMNT(c.raised)}</span></span>
+                  <span>Зорилго: ${formatMNT(c.goal)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="card p-6">
+            <h2 class="text-lg font-semibold">Үр дүн</h2>
+            <div class="mt-4 grid grid-cols-1 gap-3">
+              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border">
+                <div class="text-sm text-gray-600">Нийт хандивын дүн</div>
+                <div class="font-semibold">${formatMNT(c.raised)}</div>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border">
+                <div class="text-sm text-gray-600">Хандивлагчдын тоо</div>
+                <div class="font-semibold">${donors.toLocaleString('mn-MN')}</div>
+              </div>
+
+            </div>
+
+            ${outcome ? `
+            <div class="mt-6">
+              <h3 class="text-sm font-medium text-gray-700">Хүрсэн үр дүн</h3>
+              <p class="mt-2 text-gray-700 leading-relaxed">${outcome}</p>
+            </div>` : ''}
+
+            ${c.category ? `<div class="mt-6 text-xs text-gray-500">Ангилал: ${c.category}</div>` : ''}
+
+            <div class="mt-6">
+              <a href="campaigns.html" class="inline-flex items-center gap-2 text-rose-600">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Жагсаалт руу буцах
+              </a>
+            </div>
+          </aside>
+        </div>
+      `;
+
+      // Wire up gallery controls
+      (function(){
+        const images = imgs;
+        if(!images.length) return;
+        let idx = 0;
+        const track = document.getElementById('sGalTrack');
+        const dots = document.getElementById('sGalDots');
+        const prev = document.getElementById('sGalPrev');
+        const next = document.getElementById('sGalNext');
+        function update(){
+          track.style.transform = `translateX(-${idx*100}%)`;
+          if(dots) [...dots.children].forEach((d,i)=>{
+            d.classList.toggle('bg-white', i===idx);
+            d.classList.toggle('bg-white/50', i!==idx);
+          });
+        }
+        function go(n){ idx = (n+images.length)%images.length; update(); }
+        if (images.length<=1){ if(prev) prev.style.display='none'; if(next) next.style.display='none'; if(dots) dots.style.display='none'; }
+        if (prev) prev.onclick = ()=> go(idx-1);
+        if (next) next.onclick = ()=> go(idx+1);
+        if (dots) dots.addEventListener('click', (e)=>{ const b = e.target.closest('button[data-idx]'); if(b) go(Number(b.getAttribute('data-idx'))); });
+        // Swipe
+        const viewport = document.getElementById('sGalViewport');
+        let startX=0, curX=0, dragging=false;
+        function onDown(e){ dragging=true; startX=(e.touches?e.touches[0].clientX:e.clientX); }
+        function onMove(e){ if(!dragging) return; curX=(e.touches?e.touches[0].clientX:e.clientX); }
+        function onUp(){ if(!dragging) return; const dx=curX-startX; dragging=false; if(Math.abs(dx)>50){ if(dx<0) go(idx+1); else go(idx-1);} }
+        if(viewport){
+          viewport.addEventListener('mousedown', onDown); viewport.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
+          viewport.addEventListener('touchstart', onDown, {passive:true}); viewport.addEventListener('touchmove', onMove, {passive:true}); viewport.addEventListener('touchend', onUp);
+        }
+      })();
+    }
+  </script>
+</body>
+</html>

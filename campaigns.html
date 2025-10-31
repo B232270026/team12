@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аянууд — Хандивын Аян</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gradient-text { background: linear-gradient(to right, #e11d48, #c026d3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; overflow: hidden; }
+    .btn { padding: 0.5rem 1rem; border-radius: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #e11d48; color: white; }
+    .btn-primary:hover { background: #be123c; }
+    .btn-outline { background: white; border: 1px solid #e2e8f0; color: #334155; }
+    .btn-outline:hover { background: #f8fafc; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-white to-slate-50 text-gray-900">
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-40 backdrop-blur bg-white/70 border-b">
+    <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-xl bg-rose-600 text-white flex items-center justify-center">
+          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <a href="app.html" class="font-semibold">Хандивын Аяны Вэб</a>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="campaigns.html" class="hover:text-gray-900">Хандивын аян</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <button id="mobileMenuBtn" class="md:hidden h-9 w-9 inline-flex items-center justify-center rounded-lg border hover:bg-gray-50" aria-label="Цэс нээх">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <a href="login.html" id="loginLink" class="btn btn-outline">Нэвтрэх</a>
+        <a href="signup.html" id="signupLink" class="btn btn-outline">Бүртгүүлэх</a>
+        <div id="userMenu" class="hidden items-center gap-2">
+          <span id="userName" class="text-sm font-medium"></span>
+          <button id="logoutBtn" class="btn btn-outline">Гарах</button>
+        </div>
+        <a href="app.html#donate" id="donateBtn" class="btn btn-primary">Хандивлах</a>
+      </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="md:hidden hidden border-t bg-white/95 backdrop-blur">
+      <div class="mx-auto max-w-6xl px-4 py-3 flex flex-col gap-3 text-sm">
+        <a href="campaigns.html" class="hover:text-gray-900">Аянууд</a>
+        <a href="app.html#donate" class="hover:text-gray-900">Хандивлах</a>
+        <a href="login.html" class="text-rose-600">Нэвтрэх</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="mx-auto max-w-6xl px-4 py-8">
+  <h1 class="text-2xl md:text-4xl font-bold">Хандивын аян</h1>
+    <p class="mt-2 text-gray-600">Та доорх хайлтаар аянуудаас сонгон дэмжээрэй.</p>
+
+    <div class="mt-6">
+      <div class="flex gap-2">
+        <input id="searchInput" class="flex-1 rounded-2xl border px-4 py-3" placeholder="Гарчиг эсвэл тайлбараар хайх..." />
+        <button id="searchBtn" class="btn btn-outline">Хайх</button>
+      </div>
+    </div>
+
+    <div id="resultsInfo" class="mt-4 text-sm text-gray-600"></div>
+
+    <div id="campaignGrid" class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </main>
+
+  <script>
+    // Utils
+    function formatMNT(n){ return new Intl.NumberFormat('mn-MN').format(n) + ' ₮'; }
+    function pct(raised, goal){ return Math.min(100, Math.round((raised/Math.max(1,goal))*100)); }
+
+    // Auth UI
+    const loginLink = document.getElementById('loginLink');
+    const signupLink = document.getElementById('signupLink');
+    const userMenu = document.getElementById('userMenu');
+    const userNameEl = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
+    function updateAuthUI(){
+      const current = JSON.parse(localStorage.getItem('currentUser')||'null');
+      if(current && current.name){ loginLink.classList.add('hidden'); signupLink.classList.add('hidden'); userMenu.classList.remove('hidden'); userNameEl.textContent=current.name; }
+      else { loginLink.classList.remove('hidden'); signupLink.classList.remove('hidden'); userMenu.classList.add('hidden'); userNameEl.textContent=''; }
+    }
+    if (logoutBtn) logoutBtn.addEventListener('click', ()=>{ localStorage.removeItem('currentUser'); updateAuthUI(); window.location.href='app.html'; });
+  updateAuthUI();
+
+  // Mobile menu toggle
+  const mobileBtn = document.getElementById('mobileMenuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  if(mobileBtn && mobileMenu){ mobileBtn.addEventListener('click', ()=> mobileMenu.classList.toggle('hidden')); }
+
+    // Seed demo campaigns
+    function seedIfEmpty(){
+      const raw = localStorage.getItem('campaigns');
+      const demo = [
+        {id:'c1', title:'Ө. Үжинд туслах', category:'Эрүүл мэнд', goal:5000000, raised:1200000, images:[
+          'public/image2.jpeg',
+          'https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?w=800'
+        ], desc:'Хүүхдийн эмчилгээний зардалд дэмжлэг хэрэгтэй.', status:'active',
+          storyTitle:'Оллийн түүх',
+          storyText:`Миний хүү Олли ердөө 13 сартай. Тэр ердөө хоёрхон хоногтой байхдаа ховор, маш төвөгтэй зүрхний гажигтай гэж оношлогдсон: уушгины амсар бөглөрөл + ховдлын таславчийн цоорхой (PA-VSD) болон гол судас–уушгины том коллатерал артери (MAPCAs).
+
+Тэрээр анхны жилийнхээ ихэнх хугацааг эмнэлэгт өнгөрөөсөн. Гэхдээ энэ бүхний дунд тэр хамгийн инээмсэглэлтэй, эрхэлмээр жаахан хүү хэвээр. Тэр хөөсөөр тоглох, нугасанд дуртай, ойр байгаа бүхнийг инээлгэх дуртай.
+
+Олли бол миний ганц хүүхэд. Миний бүх дэлхий.
+Тэр өөрийн насныхаа хүүхэд бүрийн адил сургуульд явах, найз нөхөдтэй болох, дүүрэн амьдрах боломжтой байх эрхтэй.`,
+          hospitalTitle:'Яагаад Стэнфордыг сонгов?',
+          hospitalText:`Оллийн өвчин мэс засалгүйгээр амь насанд нь заналхийлнэ. Их Британийн гурван том эмнэлэг, Европын хэд хэдэн төвүүд ижилхэн хариу өгсөн:
+
+“Бид мэс засал хийж чадахгүй.”
+
+Энд санал болгож байгаа цорын ганц арга нь зөвхөн өвдөлт намдаах (palliative) тусламж — энэ нь амь насыг нь аварч чадахгүй.
+
+Эхийн хувьд би үүнийг зөвшөөрч чадахгүй. Тэгээд бид Калифорни дахь Stanford Children’s Hospital-ыг олсон — Оллийн яг энэ өвчний дэлхийд тэргүүлэх төвүүдийн нэг.
+
+Стэнфорд Оллийн түүхийг нягталж үзээд, “бид мэс засал хийх боломжтой” хэмээн хүлээн авсан. Энэ бол бидэнд өгсөн бодит найдвар.`,
+          planTitle:'Амь насыг аврах хоёр үе шат',
+          planSteps:[
+            {title:'1-р үе шат: Уушгины артерийн дахин бүтээн байгуулалт', text:`Одоогоор Оллийн уушгины артерүүд хангалттай хөгжөөгүй тул бүрэн засвар шууд хийх боломжгүй. Эхний мэс заслаар уушгинд очих цусны урсгалыг сайжруулж, 6–9 сарын хугацаанд артерийг нь хангалттай хэмжээнд өсгөх зорилготой.`},
+            {title:'2-р үе шат: Бүрэн засвар', text:`Артери хангалттай хөгжсөний дараа бүрэн засварыг хийх боломжтой болно. Бид энэ алхмыг Их Британид хийлгэх боломжтой гэж найдаж байна. Гэхдээ эхний үе шатыг Америкт яаралтай хийлгэх шаардлагатай.`}
+          ],
+          challengeTitle:'Сорилт ба зардал',
+          challengeText:`Энэ мэс заслыг Их Британи дотроо хийх боломжгүй — NHS-д шаардлагатай нарийн мэргэшсэн туршлага байхгүй. Стэнфордод хийх эмчилгээ, сэргээх болон дараах арчилгааны баталгаажсан зардал нь ойролцоогоор £1.5 сая.
+
+Энэ бол эцэг эх хэнд ч төсөөлөхийн аргагүй том дүн. Бид ганцаараа давж чадахгүй, харин та бүхний тусламжтайгаар боломжтой.` ,
+          howHelpTitle:'Та хэрхэн туслах вэ?',
+          howHelpText:`Таны өгсөн аливаа дэмжлэг — тэр дундаа хамгийн бага хандив ч Оллийн ирээдүйд том алхам болно.
+
+Хандив өгөх боломжгүй бол түүний түүхийг хуваалцаж өгнө үү. Таны хуваалцсан мэдээлэл яг хэрэгтэй хүнд нь хүрэх ч юм билүү.
+
+Энэ бол зөвхөн нэг хүүхдийн бага нас төдий биш — түүний ирээдүй, бүтэн амьдралын төлөөх боломж юм. Тэр инээдтэй, эрх чөлөөтэй, бүрэн дүүрэн амьдрах эрхтэй.
+
+Оллид итгэж, бидэнтэй хамт зогсож байгаад маш их баярлалаа.`
+        },
+        {id:'c2', title:'Сургалтын тэтгэлэг', category:'Боловсрол', goal:30000000, raised:30000000, images:[
+          'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?w=800',
+          'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=800',
+          'https://images.unsplash.com/photo-1513258496099-48168024aec0?w=800'
+        ], desc:'Оюутнуудад зориулсан тэтгэлэг.', status:'successful', donorsCount: 842, beneficiaries: 120, outcome: '120 оюутанд нэг жилийн сургалтын төлбөрийн дэмжлэг олгов.', completedAt: '2025-05-20'},
+        {id:'c3', title:'Гамшгийн үеийн тусламж', category:'Гамшиг', goal:80000000, raised:26500000, images:[
+          'https://images.unsplash.com/photo-1500077423678-2dae49da5683?w=800',
+          'public/image1.jpeg'
+        ], desc:'Гамшигт өртөгсдөд шуурхай тусламж үзүүлэх.', status:'active'}
+      ];
+      if(!raw){
+        localStorage.setItem('campaigns', JSON.stringify(demo));
+        return;
+      }
+      try{
+        const existing = JSON.parse(raw) || [];
+        const ids = new Set(existing.map(c=>String(c.id)));
+        let changed = false;
+        demo.forEach(d=>{
+          if(!ids.has(String(d.id))){ existing.push(d); changed = true; }
+        });
+        if(changed){ localStorage.setItem('campaigns', JSON.stringify(existing)); }
+      }catch(e){
+        // if parsing fails, reset with demo
+        localStorage.setItem('campaigns', JSON.stringify(demo));
+      }
+    }
+    seedIfEmpty();
+
+    // Render list
+    const grid = document.getElementById('campaignGrid');
+    const resultsInfo = document.getElementById('resultsInfo');
+    function getAll(){ try { return JSON.parse(localStorage.getItem('campaigns')||'[]'); } catch { return []; } }
+
+    function renderList(list){
+      resultsInfo.textContent = `Нийт ${list.length} аян`; 
+      grid.innerHTML = list.map(c=>{
+        const p=pct(c.raised,c.goal);
+        const img = c.img || c.image || (Array.isArray(c.images) && c.images.length? c.images[0] : '');
+  const detailPage = (c.status === 'successful' || (c.raised >= c.goal)) ? 'campaign-success.html' : 'campaign.html';
+        return `
+          <a class="card hover:shadow-md transition-shadow" href="${detailPage}?id=${encodeURIComponent(c.id)}">
+            <div class="h-40 sm:h-44 bg-gray-100 overflow-hidden">${img?`<img src="${img}" alt="${c.title}" class="w-full h-full object-cover"/>`:''}</div>
+            <div class="p-4">
+              <h3 class="font-semibold text-base sm:text-lg line-clamp-2">${c.title}</h3>
+              <div class="mt-3 w-full bg-gray-200 rounded-full h-2 sm:h-2.5" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}">
+                <div class="bg-green-500 h-2 sm:h-2.5 rounded-full" style="width:${p}%"></div>
+              </div>
+              <div class="mt-2 text-sm text-gray-600 flex justify-between">
+                <span>Цугларсан: <span class="font-medium">${formatMNT(c.raised)}</span></span>
+                <span>Зорилго: ${formatMNT(c.goal)}</span>
+              </div>
+              <div class="mt-2 text-xs text-gray-500">Ангилал: ${c.category||'Бусад'} • Ахиц: ${p}% ${(c.status==='successful' || c.raised>=c.goal) ? '• Амжилттай' : ''}</div>
+            </div>
+          </a>`;
+      }).join('');
+    }
+
+    function applyFilters(){
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const all = getAll();
+      // Only show medical campaigns
+      const medical = all.filter(c => (c.category === 'Эрүүл мэнд') || !c.category);
+      const out = medical.filter(c=>{
+        const hay = `${c.title} ${c.desc||''}`.toLowerCase();
+        const matchesQ = !q || hay.includes(q);
+        return matchesQ;
+      });
+      renderList(out);
+    }
+
+  document.getElementById('searchBtn').addEventListener('click', applyFilters);
+  document.getElementById('searchInput').addEventListener('keyup', (e)=>{ if(e.key==='Enter') applyFilters(); });
+
+  // init
+  applyFilters();
+  </script>
+</body>
+</html>

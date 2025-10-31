@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бүртгүүлэх — Хандивын Аян</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-white to-slate-50 text-gray-900 flex items-center justify-center">
+  <div class="w-full max-w-md p-6">
+    <div class="card p-6">
+      <h1 class="text-2xl font-bold mb-4">Бүртгүүлэх</h1>
+
+      <form id="signupForm" class="space-y-3">
+        <input id="nameInput" class="w-full rounded-2xl border px-4 py-3" placeholder="Таны нэр" required>
+        <input id="emailInput" type="email" class="w-full rounded-2xl border px-4 py-3" placeholder="И-мэйл" required>
+        <input id="passwordInput" type="password" class="w-full rounded-2xl border px-4 py-3" placeholder="Нууц үг" required>
+        <input id="confirmInput" type="password" class="w-full rounded-2xl border px-4 py-3" placeholder="Нууц үг давтах" required>
+
+        <div class="flex items-center justify-between">
+          <button type="submit" class="btn btn-primary">Бүртгүүлэх</button>
+          <a href="login.html" class="text-sm text-rose-600">Бүртгэлтэй бол нэвтрэх</a>
+        </div>
+      </form>
+
+      <p class="mt-4 text-sm text-gray-500">(Demo) Энэхүү форм нь сервергүй, хэрэглэгчийн мэдээллийг таны браузерын localStorage-д хадгална.</p>
+      <div class="mt-4 text-sm">
+        <a href="app.html" class="text-gray-600">← Буцах Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('nameInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim().toLowerCase();
+      const password = document.getElementById('passwordInput').value;
+      const confirm = document.getElementById('confirmInput').value;
+
+      if (!name || !email || !password) {
+        alert('Бүх талбарыг бөглөнө үү');
+        return;
+      }
+      if (password !== confirm) {
+        alert('Нууц үгнүүд таарахгүй байна');
+        return;
+      }
+
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      if (users.find(u => u.email === email)) {
+        alert('Тус и-мэйлтэй хэрэглэгч аль хэдийн бүртгэгдсэн');
+        return;
+      }
+
+      users.push({ name, email, password });
+      localStorage.setItem('users', JSON.stringify(users));
+      // set current user (demo)
+      localStorage.setItem('currentUser', JSON.stringify({ name, email }));
+      // redirect to home
+      window.location.href = './app.html';
+    });
+  </script>
+</body>
+</html>

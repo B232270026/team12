@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аян үүсгэх хаалттай</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; overflow: hidden; }
+  .btn { padding: 0.5rem 1rem; border-radius: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: #e11d48; color: white; }
+  .btn-primary:hover { background: #be123c; }
+    .btn-outline { background: white; border: 1px solid #e2e8f0; color: #334155; }
+    .btn-outline:hover { background: #f8fafc; }
+  </style>
+<body class="min-h-screen bg-gradient-to-b from-white to-slate-50 text-gray-900 flex items-center justify-center">
+  <div class="w-full max-w-lg p-6">
+    <div class="card p-6 text-center">
+  <h1 class="text-2xl font-bold">Аян үүсгэх хаалттай</h1>
+  <p class="mt-2 text-gray-600">Одоогоор олон нийтээр шууд аян үүсгэх боломжгүй. Хандив өгөх бол нүүр хуудас руу буцна уу.</p>
+  <div class="mt-4">
+        <a href="app.html" class="btn btn-primary">Нүүр хуудас руу буцах</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    setTimeout(()=>{ window.location.href = 'app.html'; }, 3000);
+  </script>
+  </body>
+  </html>
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аян үүсгэх — Хандивын Аян</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; overflow: hidden; }
+    .btn { padding: 0.5rem 1rem; border-radius: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #e11d48; color: white; }
+    .btn-primary:hover { background: #be123c; }
+    .btn-outline { background: white; border: 1px solid #e2e8f0; color: #334155; }
+    .btn-outline:hover { background: #f8fafc; }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-white to-slate-50 text-gray-900">
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-40 backdrop-blur bg-white/70 border-b">
+    <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-xl bg-rose-600 text-white flex items-center justify-center">
+          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <a href="app.html" class="font-semibold">Хандивын Аяны Вэб</a>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="campaigns.html" class="hover:text-gray-900">Аянууд</a>
+        <a href="create.html" class="hover:text-gray-900">Аян үүсгэх</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <a href="login.html" id="loginLink" class="btn btn-outline">Нэвтрэх</a>
+        <a href="signup.html" id="signupLink" class="btn btn-outline">Бүртгүүлэх</a>
+        <div id="userMenu" class="hidden items-center gap-2">
+          <span id="userName" class="text-sm font-medium"></span>
+          <button id="logoutBtn" class="btn btn-outline">Гарах</button>
+        </div>
+        <a href="app.html#donate" id="donateBtn" class="btn btn-primary">Хандивлах</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-3xl px-4 py-8">
+    <h1 class="text-3xl md:text-4xl font-bold">Аян үүсгэх</h1>
+    <p class="mt-2 text-gray-600">Доорх мэдээллийг үнэн зөв бөглөнө үү. (Demo: таны браузерын localStorage-д хадгална)</p>
+
+    <form id="createForm" class="card p-6 mt-6 space-y-4">
+      <input id="title" class="w-full rounded-2xl border px-4 py-3" placeholder="Аяны гарчиг" required />
+      <textarea id="desc" rows="5" class="w-full rounded-2xl border px-4 py-3" placeholder="Товч тайлбар" required></textarea>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm text-gray-600">Зорилго (₮)</label>
+          <input id="goal" type="number" min="100000" step="1000" class="mt-1 w-full rounded-2xl border px-4 py-3" placeholder="5000000" required />
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Ангилал</label>
+          <select id="category" class="mt-1 w-full rounded-2xl border px-4 py-3" aria-readonly="true">
+            <option selected>Эрүүл мэнд</option>
+          </select>
+          <div class="mt-1 text-xs text-gray-500">Зөвхөн эмнэлгийн (өвчтөнд чиглэсэн) аян байршуулах боломжтой.</div>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-600">Зураг</label>
+        <input id="imageInput" type="file" accept="image/*" class="mt-1 w-full rounded-2xl border px-4 py-3" />
+        <div id="preview" class="mt-3 hidden h-48 rounded-xl overflow-hidden border bg-gray-100"></div>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <a href="campaigns.html" class="btn btn-outline">← Буцах</a>
+        <button class="btn btn-primary" type="submit">Үүсгэх</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    // Auth UI
+    const loginLink = document.getElementById('loginLink');
+    const signupLink = document.getElementById('signupLink');
+    const userMenu = document.getElementById('userMenu');
+    const userNameEl = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
+    function updateAuthUI(){
+      const current = JSON.parse(localStorage.getItem('currentUser')||'null');
+      if(current && current.name){ loginLink.classList.add('hidden'); signupLink.classList.add('hidden'); userMenu.classList.remove('hidden'); userNameEl.textContent=current.name; }
+      else { loginLink.classList.remove('hidden'); signupLink.classList.remove('hidden'); userMenu.classList.add('hidden'); userNameEl.textContent=''; }
+    }
+    if (logoutBtn) logoutBtn.addEventListener('click', ()=>{ localStorage.removeItem('currentUser'); updateAuthUI(); window.location.href='app.html'; });
+    updateAuthUI();
+
+    // Image preview
+    let imageData = '';
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+    imageInput.addEventListener('change', (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{ imageData = String(reader.result); preview.innerHTML = `<img src="${imageData}" class="w-full h-full object-cover"/>`; preview.classList.remove('hidden'); };
+      reader.readAsDataURL(file);
+    });
+
+    function getAll(){ try { return JSON.parse(localStorage.getItem('campaigns')||'[]'); } catch { return []; } }
+    function saveAll(list){ localStorage.setItem('campaigns', JSON.stringify(list)); }
+
+    document.getElementById('createForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const title = document.getElementById('title').value.trim();
+      const desc = document.getElementById('desc').value.trim();
+      const goal = Number(document.getElementById('goal').value||0);
+  const category = 'Эрүүл мэнд';
+      if(!title || !desc || goal<=0){ alert('Мэдээллээ бүрэн зөв оруулна уу.'); return; }
+
+      const current = JSON.parse(localStorage.getItem('currentUser')||'null');
+      const createdBy = current?.email || 'guest';
+
+      const list = getAll();
+      const id = 'c' + Date.now();
+      const img = imageData || 'https://images.unsplash.com/photo-1520975922323-283ebf82cc62?w=900';
+      const newItem = { id, title, desc, goal, raised: 0, category, img, createdBy, createdAt: new Date().toISOString() };
+      list.unshift(newItem);
+      saveAll(list);
+      window.location.href = `campaign.html?id=${encodeURIComponent(id)}`;
+    });
+  </script>
+</body>
+</html>
